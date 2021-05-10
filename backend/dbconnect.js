@@ -12,6 +12,12 @@ db.defaults({memes:[]}).write();
 app.use(express.json());
 app.use(cors());
 
+// function checkURL(url) {
+//     return(url.match(/\.(jpeg|jpg|gif|png)$/) != null);
+// }
+
+// var picNotFoundAltLink = "https://bitsofco.de/content/images/2018/12/broken-1.png";
+
 app.get('/memes',(req,res) => {
     const data = db.get('memes').value();
     res.status(200).json(data);
@@ -21,8 +27,14 @@ app.post('/memes',(req,res) => {
     var meme = req.body;
     const data = db.get('memes').value();
     meme["id"] = data.length+1;
+
     if(meme.insertedId || meme.insertedId == "")
         delete meme.insertedId;
+
+    // if(!checkURL(meme["url"])){
+    //     meme.url = picNotFoundAltLink;
+    // }
+
     if((!req.body.name) || (!req.body.caption) || (!req.body.url)){
         res.status(400).send("Invalid Request");
     }
@@ -54,6 +66,9 @@ app.patch('/memes/:memeId',(req,res) => {
     else{
         try{
             const upId = parseInt(req.params.memeId);
+            // if(!checkURL(req.params.url)){
+            //     req.params.url = picNotFoundAltLink;
+            // }
             db.get('memes').find({ id: upId }).assign({caption: req.body.caption},{url: req.body.url}).write();
             res.status(201).json({"success" : true});
         }catch(err){
